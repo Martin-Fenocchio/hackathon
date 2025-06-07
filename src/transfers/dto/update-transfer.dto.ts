@@ -1,3 +1,3 @@
 export class UpdateTransferDto {
-    transferid: string;
-} 
+  transferid: string;
+}
