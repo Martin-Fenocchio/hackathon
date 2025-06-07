@@ -64,10 +64,10 @@ export class OrchestratorService {
     console.log('transfer', transfer);
     const user = await this.usersService.findOne(payload.telephone);
     console.log('user', user);
-    const { transferenceID } = await this.solanaService.transferSol({
+    const { transferenceID } = await this.solanaService.transferToken({
       fromSecretKey: user!.privatekey,
       toPublicKey: transfer.destination_publickey,
-      amountSol: transfer.amount,
+      amount: transfer.amount,
     });
 
     console.log('transferenceID', transferenceID);

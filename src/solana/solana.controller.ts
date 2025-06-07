@@ -16,9 +16,9 @@ export class SolanaController {
     transferDto: {
       fromSecretKey: string;
       toPublicKey: string;
-      amountSol: number;
+      amount: number;
     },
   ) {
-    return this.solanaService.transferSol(transferDto);
+    return this.solanaService.transferToken(transferDto);
   }
 }
