@@ -1,9 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
 import { Injectable, HttpException, HttpStatus, Logger, Inject } from '@nestjs/common';
@@ -16,7 +15,6 @@ import { AIRole } from 'src/ai/enum/roles.enum';
 import { AIMessage } from '../../ai/dto/message.dto';
 import nutritionalAnalysisPrompt from '../../ai/utils/prompt/agent.prompt';
 import imageDescriptionPrompt from '../../ai/utils/prompt/imageDescription.prompt';
-// import { nutritionalAnalysisSchema } from '../../ai/schema';
 import { ConversationMessage } from '../../ai/interfaces/completions';
 import { WhatsAppMessageType } from '../enum/message.types.enum';
 
@@ -173,7 +171,6 @@ export class WhatsAppService {
         ],
         model: OpenAIModel.GPT4O_MINI,
         maxTokens: 800,
-        //schema: nutritionalAnalysisSchema,
       });
 
       this.addToConversationHistory(phoneNumber, AIRole.ASSISTANT, response.responseText);
@@ -274,7 +271,6 @@ export class WhatsAppService {
         model: OpenAIModel.GPT4O_MINI,
         temperature: 0.2,
         maxTokens: 1200,
-        schema: nutritionalAnalysisSchema,
       });
 
       if (phoneNumber) {
@@ -329,7 +325,6 @@ export class WhatsAppService {
         model: OpenAIModel.GPT4O_MINI,
         temperature: 0.2,
         maxTokens: 1200,
-        //schema: nutritionalAnalysisSchema,
       });
 
       return response.responseText;
