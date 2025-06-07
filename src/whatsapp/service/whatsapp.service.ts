@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
@@ -271,7 +272,7 @@ export class WhatsAppService {
 
     switch (buttonId) {
       case 'create_wallet': {
-        const wallet = this.solanaService.createWallet();
+        const wallet = await this.solanaService.createWallet();
 
         const user = await this.usersService.create(phoneNumber, wallet.secretKey, wallet.publicKey);
 
@@ -333,7 +334,6 @@ export class WhatsAppService {
         try {
           // Subir la imagen y obtener mediaId
           const mediaId = await this.whatsappApiService.uploadMedia(tempFilePath);
-
 
           // Enviar imagen del comprobante
           await this.whatsappApiService.sendMediaMessage(phoneNumber, mediaId, 'image', 'Comprobante de transferencia');
