@@ -15,7 +15,7 @@ import { AIRole } from 'src/ai/enum/roles.enum';
 import { AIMessage } from '../../ai/dto/message.dto';
 import nutritionalAnalysisPrompt from '../../ai/utils/prompt/agent.prompt';
 import imageDescriptionPrompt from '../../ai/utils/prompt/imageDescription.prompt';
-import { nutritionalAnalysisSchema } from '../../ai/schema';
+// import { nutritionalAnalysisSchema } from '../../ai/schema';
 import { ConversationMessage } from '../../ai/interfaces/completions';
 
 @Injectable()
@@ -181,7 +181,7 @@ export class WhatsAppService {
         ],
         model: OpenAIModel.GPT4O_MINI,
         maxTokens: 800,
-        schema: nutritionalAnalysisSchema,
+        //schema: nutritionalAnalysisSchema,
       });
 
       this.addToConversationHistory(phoneNumber, AIRole.ASSISTANT, response.responseText);
@@ -337,7 +337,7 @@ export class WhatsAppService {
         model: OpenAIModel.GPT4O_MINI,
         temperature: 0.2,
         maxTokens: 1200,
-        schema: nutritionalAnalysisSchema,
+        //schema: nutritionalAnalysisSchema,
       });
 
       return response.responseText;

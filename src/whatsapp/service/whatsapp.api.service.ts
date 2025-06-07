@@ -13,8 +13,8 @@ import {
   SimpleOutgoingMessage,
   SimpleIncomingMessageContent,
   SimpleIncomingMessagePayload,
-} from '../../whatsapp/dto/whatsapp.message.dto';
-import { WhatsAppMessageType } from '../../whatsapp/enum/message.types.enum';
+} from '../dto/whatsapp.message.dto';
+import { WhatsAppMessageType } from '../enum/message.types.enum';
 
 @Injectable()
 export class WhatsappApiService {
@@ -56,6 +56,8 @@ export class WhatsappApiService {
           },
         }),
       );
+
+      console.log(outgoingMessage, 'outgoingMessage');
 
       const messageId = (response.data as any)?.messages?.[0]?.id;
       this.logger.debug(`Mensaje enviado con ID: ${messageId}`);
