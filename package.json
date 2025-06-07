@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build",
+    "build": "nest build && node scripts/copy-templates.js",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\"",
     "format:all": "prettier --write .",
@@ -33,9 +33,12 @@
     "@nestjs/platform-express": "^11.0.1",
     "@solana/web3.js": "^1.98.2",
     "@supabase/supabase-js": "^2.50.0",
+    "@types/handlebars": "^4.0.40",
     "axios": "^1.9.0",
     "canvas": "^3.1.0",
+    "handlebars": "^4.7.8",
     "openai": "^5.1.1",
+    "puppeteer": "^24.10.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "zod": "^3.25.56"
