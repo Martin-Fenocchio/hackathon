@@ -1,13 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import {
-  Connection,
-  Keypair,
-  LAMPORTS_PER_SOL,
-  PublicKey,
-  sendAndConfirmTransaction,
-  SystemProgram,
-  Transaction,
-} from '@solana/web3.js';
+import { Connection, Keypair, PublicKey } from '@solana/web3.js';
+import { getOrCreateAssociatedTokenAccount, transfer as splTransfer, getMint } from '@solana/spl-token';
 
 @Injectable()
 export class SolanaService {
@@ -25,26 +18,42 @@ export class SolanaService {
     };
   }
 
-  async transferSol({
+  async transferToken({
     fromSecretKey,
     toPublicKey,
-    amountSol,
+    amount,
   }: {
     fromSecretKey: string;
     toPublicKey: string;
-    amountSol: number;
+    amount: number;
   }) {
     const fromKeypair = Keypair.fromSecretKey(Buffer.from(fromSecretKey, 'base64'));
     const toPubKey = new PublicKey(toPublicKey);
+    const mint = new PublicKey('5LaS3B9mNKrqj2JuFLFezyKFrfhg2uP3fg85z6dffyoS');
 
-    const transaction = new Transaction().add(
-      SystemProgram.transfer({
-        fromPubkey: fromKeypair.publicKey,
-        toPubkey: toPubKey,
-        lamports: amountSol * LAMPORTS_PER_SOL,
-      }),
+    // 1. Obtener info del token (para saber cuántos decimales tiene)
+    const mintInfo = await getMint(this.connection, mint);
+    const amountInBaseUnits = BigInt(amount * 10 ** mintInfo.decimals);
+
+    // 2. Obtener (o crear) cuentas asociadas de token
+    const fromTokenAccount = await getOrCreateAssociatedTokenAccount(
+      this.connection,
+      fromKeypair,
+      mint,
+      fromKeypair.publicKey,
     );
-    const signature = await sendAndConfirmTransaction(this.connection, transaction, [fromKeypair]);
+
+    const toTokenAccount = await getOrCreateAssociatedTokenAccount(this.connection, fromKeypair, mint, toPubKey);
+
+    // 3. Transferencia
+    const signature = await splTransfer(
+      this.connection,
+      fromKeypair,
+      fromTokenAccount.address,
+      toTokenAccount.address,
+      fromKeypair.publicKey,
+      amountInBaseUnits,
+    );
 
     return { transferenceID: signature };
   }
