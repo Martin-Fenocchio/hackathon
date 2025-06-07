@@ -44,11 +44,12 @@ export class VoucherService {
 			});
 
 			// Prepare the data for the template
-			const templateData = {
+			const templateData = { 
+				coinType: '$PESOS',  
 				amount: transfer.amount.toLocaleString('es-AR'),
 				transferid: transfer.transferid,
 				destination_publickey: transfer.destination_publickey,
-				date: transfer.created_at?.toLocaleString('es-AR') || new Date().toLocaleString('es-AR')
+				date: new Date().toLocaleString('es-AR')
 			};
 
 			// Render the template with data

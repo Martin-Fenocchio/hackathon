@@ -5,4 +5,4 @@ export class Transfer {
     amount: number;
     destination_publickey: string;
     created_at?: Date;
-} 
+}  
