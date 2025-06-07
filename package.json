@@ -27,6 +27,8 @@
     "@nestjs/core": "^11.0.1",
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^11.0.1",
+    "@solana/web3.js": "^1.98.2",
+    "@supabase/supabase-js": "^2.50.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   },
