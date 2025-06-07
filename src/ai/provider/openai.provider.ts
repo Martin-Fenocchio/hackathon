@@ -15,7 +15,9 @@ export class OpenAIProvider {
 
   constructor(private readonly configService: ConfigService) {
     this.openAI = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY ?? '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',
+
+      apiKey:
+        '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',
     });
   }
 
@@ -44,7 +46,7 @@ export class OpenAIProvider {
             model: model as string,
             messages: messages as ChatCompletionMessageParam[],
             max_tokens: maxTokens,
-            response_format: zodResponseFormat(schema, 'nutritionalAnalysisSchema'),
+            // response_format: zodResponseFormat(schema, 'nutritionalAnalysisSchema'),
           });
 
           if (parsed.choices[0].finish_reason === 'length') {

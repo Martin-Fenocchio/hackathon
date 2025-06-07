@@ -21,7 +21,8 @@ export class AiService {
     private readonly configService: ConfigService,
   ) {
     this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY ?? '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',
+      apiKey:
+        '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',
     });
   }
 

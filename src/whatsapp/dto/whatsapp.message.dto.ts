@@ -44,6 +44,23 @@ export class SimpleIncomingMessagePayload {
     return this.entry[0].changes[0].value.messages[0]?.image;
   }
 
+  public get interactive() {
+    if (!this.entry[0]?.changes[0]?.value?.messages) return;
+    return this.entry[0].changes[0].value.messages[0]?.interactive;
+  }
+
+  public get buttonPressed() {
+    if (!this.entry[0]?.changes[0]?.value?.messages) return;
+    const interactive = this.entry[0].changes[0].value.messages[0]?.interactive;
+    return interactive?.button_reply?.id;
+  }
+
+  public get buttonText() {
+    if (!this.entry[0]?.changes[0]?.value?.messages) return;
+    const interactive = this.entry[0].changes[0].value.messages[0]?.interactive;
+    return interactive?.button_reply?.title;
+  }
+
   public get type() {
     if (!this.entry[0]?.changes[0]?.value?.messages) return;
     return this.entry[0].changes[0].value.messages[0].type;
@@ -71,7 +88,8 @@ export class SimpleIncomingMessagePayload {
       messages?.length &&
       (messages[0].type === WhatsAppMessageType.TEXT ||
         messages[0].type === WhatsAppMessageType.AUDIO ||
-        messages[0].type === WhatsAppMessageType.IMAGE)
+        messages[0].type === WhatsAppMessageType.IMAGE ||
+        messages[0].type === WhatsAppMessageType.INTERACTIVE)
     );
   }
 
@@ -109,6 +127,12 @@ class SimpleBaseMessage {
     caption?: string;
     sha256?: string;
     mime_type?: string;
+  };
+  interactive?: {
+    button_reply?: {
+      id: string;
+      title: string;
+    };
   };
   text?: {
     body: string;
