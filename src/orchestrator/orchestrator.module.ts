@@ -8,9 +8,9 @@ import { TransfersModule } from 'src/transfers/transfers.module';
 import { VoucherModule } from '../voucher/voucher.module';
 
 @Module({
-    imports: [SolverModule, ContactsModule, AiModule, TransfersModule, VoucherModule],
-    controllers: [OrchestratorController],
-    providers: [OrchestratorService],
-    exports: [OrchestratorService],
+  imports: [SolverModule, ContactsModule, AiModule, TransfersModule, VoucherModule],
+  controllers: [OrchestratorController],
+  providers: [OrchestratorService],
+  exports: [OrchestratorService],
 })
-export class OrchestratorModule {} 
+export class OrchestratorModule {}
