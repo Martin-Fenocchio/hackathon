@@ -39,7 +39,7 @@ export class AiService {
         model,
         temperature,
         maxTokens,
-        schema,
+        // schema,
       });
     }
 

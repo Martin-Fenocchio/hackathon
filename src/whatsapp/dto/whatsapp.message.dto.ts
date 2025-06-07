@@ -1,4 +1,4 @@
-import { WhatsAppMessageType } from '../../whatsapp/enum/message.types.enum';
+import { WhatsAppMessageType } from '../enum/message.types.enum';
 
 export class SimpleIncomingMessagePayload {
   object: string;
