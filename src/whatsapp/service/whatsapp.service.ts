@@ -161,7 +161,7 @@ export class WhatsAppService {
         messages: [
           {
             role: AIRole.SYSTEM,
-            content: nutritionalAnalysisPrompt,
+            content: 'Responde hola',
           },
           ...history,
           {
@@ -173,9 +173,9 @@ export class WhatsAppService {
         maxTokens: 800,
       });
 
-      this.addToConversationHistory(phoneNumber, AIRole.ASSISTANT, response.responseText);
+      this.addToConversationHistory(phoneNumber, AIRole.ASSISTANT, response);
 
-      await this.whatsappApiService.sendTextMessage(phoneNumber, response.responseText);
+      await this.whatsappApiService.sendTextMessage(phoneNumber, response);
     } catch (error) {
       this.logger.error('Error procesando mensaje de texto:', error);
       await this.whatsappApiService.sendTextMessage(

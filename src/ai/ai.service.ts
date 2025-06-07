@@ -20,8 +20,10 @@ export class AiService {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
   ) {
+    console.log('t', this.configService.get<string>('OPENAI_API_KEY'));
+
     this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY ?? '',
+      apiKey: this.configService.get<string>('OPENAI_API_KEY'),
     });
   }
 
@@ -31,7 +33,6 @@ export class AiService {
     model,
     temperature,
     maxTokens,
-    schema,
   }: OpenAIOptionsDto): Promise<any> {
     if (provider === AIProvider.OPENAI) {
       return await this.openAIProvider.getChatCompletion<T>({
