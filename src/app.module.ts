@@ -8,9 +8,21 @@ import { ContactsModule } from './contacts/contacts.module';
 import { AiModule } from './ai/ai.module';
 import { HttpModule } from '@nestjs/axios';
 import { ConfigModule } from '@nestjs/config';
+import { OrchestratorModule } from './orchestrator/orchestrator.module';
+import { TransfersModule } from './transfers/transfers.module';
 
 @Module({
-  imports: [SolanaModule, WhatsappModule, UsersModule, ContactsModule, AiModule, ConfigModule, HttpModule],
+  imports: [
+    SolanaModule,
+    WhatsappModule,
+    UsersModule,
+    ContactsModule,
+    AiModule,
+    ConfigModule,
+    HttpModule,
+    OrchestratorModule,
+    TransfersModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

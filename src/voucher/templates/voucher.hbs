@@ -1,0 +1,135 @@
+<html lang='es'>
+
+  <head>
+    <meta charset='UTF-8' />
+    <title>Voucher de Transferencia</title>
+
+    <link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap' rel='stylesheet' />
+
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      h1 {
+        color: black;
+        font-size: 40px;
+        span {
+          color: rgb(54, 41, 245);
+        }
+      }
+
+      body {
+        font-family: 'Inter', Arial, sans-serif;
+        background: #f2f0ff;
+        /* lilac page background */
+        display: flex;
+        justify-content: center;
+        padding: 48px 0;
+      }
+
+      .wrapper {
+        width: 780px;
+      }
+
+      /* Brubank logo (swap src) */
+      .logo {
+        width: 160px;
+        margin: 0 auto 32px;
+      }
+
+      .logo img {
+        width: 100%;
+      }
+
+      /* Main voucher card */
+      .card {
+        background: #fff;
+        border-radius: 24px;
+        padding: 48px 40px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      }
+
+      .label {
+        color: #888;
+        font-size: 20px;
+        font-weight: 600;
+        text-align: center;
+        margin-bottom: 20px;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+      }
+
+      .amount {
+        font-size: 48px;
+        font-weight: 800;
+        color: #000;
+        text-align: center;
+        margin-bottom: 28px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #d6f7e3;
+        color: #008000;
+        font-size: 20px;
+        font-weight: 600;
+        padding: 12px 24px;
+        border-radius: 999px;
+        margin: 0 auto 36px;
+        display: block;
+        width: fit-content;
+      }
+
+      .details {
+        font-size: 18px;
+        line-height: 32px;
+        color: #444;
+      }
+
+      .details span {
+        font-weight: 600;
+        color: #000;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class='wrapper'>
+
+      <!-- Logo ------------------------------------------------------------ -->
+      <div class='logo'>
+        <h1>Crypt<span>Neo</span></h1>
+      </div>
+
+      <!-- Voucher card ---------------------------------------------------- -->
+      <div class='card'>
+
+        <div class='label'>Envío de dinero</div>
+
+        <!-- Amount with coin type -->
+        <div class='amount'>
+          {{amount}}
+          {{coinType}}
+        </div>
+
+        <!-- Success badge -->
+        <div class='badge'>✓ Transferencia enviada</div>
+
+        <!-- Available details -->
+        <div class='details'>
+          <div><span>ID de transferencia:</span> {{transferid}}</div>
+          <div><span>Destinatario:</span>
+            {{destination_publickey}}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </body>
+
+</html>
