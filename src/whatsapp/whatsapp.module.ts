@@ -8,9 +8,10 @@ import { WhatsAppService } from './service/whatsapp.service';
 import { WhatsappApiService } from './service/whatsapp.api.service';
 import { WhatsAppController } from './whatsapp.controller';
 import { SolanaModule } from 'src/solana/solana.module';
-
+import { OrchestratorModule } from 'src/orchestrator/orchestrator.module';
+import { UsersModule } from 'src/users/users.module';
 @Module({
-  imports: [HttpModule, ConfigModule, SolanaModule],
+  imports: [HttpModule, ConfigModule, SolanaModule, OrchestratorModule, UsersModule],
   controllers: [WhatsAppController],
   providers: [WhatsappApiService, WhatsAppService, AiService, OpenAIProvider],
   exports: [WhatsappApiService, WhatsAppService],

@@ -18,6 +18,8 @@ import imageDescriptionPrompt from '../../ai/utils/prompt/imageDescription.promp
 import { ConversationMessage } from '../../ai/interfaces/completions';
 import { WhatsAppMessageType } from '../enum/message.types.enum';
 import { SolanaService } from 'src/solana/solana.service';
+import { OrchestratorService } from 'src/orchestrator/orchestrator.service';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class WhatsAppService {
@@ -33,6 +35,8 @@ export class WhatsAppService {
     private readonly whatsappApiService: WhatsappApiService,
     private readonly aiService: AiService,
     private readonly solanaService: SolanaService,
+    private readonly orchestratorService: OrchestratorService,
+    private readonly usersService: UsersService,
   ) {
     this.verificationToken = 'hackathon';
     this.phoneNumberId = '720551657798613';
@@ -207,17 +211,33 @@ export class WhatsAppService {
     try {
       this.logger.log(`Mensaje de texto recibido de ${message.phoneNumber}: ${text}`);
 
-      const history = this.getConversationHistory(message.phoneNumber);
+      // const history = this.getConversationHistory(message.phoneNumber);
 
-      const response = await this.aiService.chat({
-        messages: history,
-        model: OpenAIModel.GPT4O_MINI,
-        maxTokens: 800,
+      // const response = await this.aiService.chat({
+      //   messages: history,
+      //   model: OpenAIModel.GPT4O_MINI,
+      //   maxTokens: 800,
+      // });
+
+      // this.addToConversationHistory(message.phoneNumber, AIRole.ASSISTANT, response);
+
+      // await this.whatsappApiService.sendTextMessage(message.phoneNumber, response);
+      console.log('orchestrateTransferText', message.phoneNumber, text);
+      const result = await this.orchestratorService.orchestrateTransferText({
+        text,
+        userTelephone: message.phoneNumber,
       });
 
-      this.addToConversationHistory(message.phoneNumber, AIRole.ASSISTANT, response);
+      console.log(result, 'result');
 
-      await this.whatsappApiService.sendTextMessage(message.phoneNumber, response);
+      await this.whatsappApiService.sendInteractiveButtonMessage(
+        message.phoneNumber,
+        `¿Quieres confirmar la transferencia de ${result.amount} pesos a ${result.recipient.value}?`,
+        [
+          { id: 'no', title: 'No' },
+          { id: 'si', title: 'Si' },
+        ],
+      );
     } catch (error) {
       this.logger.error('Error procesando mensaje de texto:', error);
       await this.whatsappApiService.sendTextMessage(
@@ -249,11 +269,13 @@ export class WhatsAppService {
       case 'create_wallet':
         const wallet = await this.solanaService.createWallet();
 
+        const user = await this.usersService.create(phoneNumber, wallet.secretKey, wallet.publicKey);
+
         await this.whatsappApiService.sendTextMessage(
           phoneNumber,
           `¡Perfecto! 🎉 Hemos creado tu wallet.\n\n` +
             `🌎 Llave pública: ${wallet.publicKey}\n` +
-            `🔒 Llave privada: ${wallet.secretKey}` +
+            `🔒 Llave privada: ${wallet.secretKey}\n\n` +
             `¿Queres enviar pesos a un amigo? 💸`,
         );
 
