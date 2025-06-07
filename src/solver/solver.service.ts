@@ -24,8 +24,9 @@ export class SolverService {
             "amount": number,
             "confidence": number between 0 and 1
         }
-
-        Text to analyze: ${solveTextDto.text}`;
+		    Only return the JSON, nothing else.
+        Text to analyze: ${solveTextDto.text}.
+        `;
 
     const result = await this.aiService.chat({
       messages: [
