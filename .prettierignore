@@ -1,0 +1,39 @@
+# Dependencias
+node_modules/
+dist/
+build/
+
+# Archivos de configuración
+package-lock.json
+yarn.lock
+.env
+.env.*
+
+# Archivos de log
+*.log
+
+# Archivos generados
+coverage/
+.nyc_output/
+
+# Archivos de IDE
+.vscode/
+.idea/
+
+# Archivos de Git
+.git/
+
+# Archivos de documentación que no necesitan formato
+README.md
+CHANGELOG.md
+LICENSE
+
+# Archivos de configuración JSON que pueden tener formato específico
+.eslintrc.json
+tsconfig.json
+tsconfig.build.json
+nest-cli.json
+
+# Archivos temporales
+*.tmp
+*.temp 
