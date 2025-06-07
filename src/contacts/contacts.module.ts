@@ -7,5 +7,6 @@ import { DatabaseModule } from '../database/database.module';
     imports: [DatabaseModule],
     controllers: [ContactsController],
     providers: [ContactsService],
+    exports: [ContactsService],
 })
 export class ContactsModule {}

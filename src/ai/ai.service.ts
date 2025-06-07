@@ -1,10 +1,8 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { firstValueFrom } from 'rxjs';
 import { AIProvider } from './enum/roles.enum';
 import { AIRole } from './enum/roles.enum';
-import { Completion } from './interfaces/completions';
 import { OpenAIOptionsDto } from './dto/openai.dto';
 import { OpenAIProvider } from './provider/openai.provider';
 import OpenAI from 'openai';
@@ -23,7 +21,7 @@ export class AiService {
     private readonly configService: ConfigService,
   ) {
     this.openai = new OpenAI({
-      apiKey: this.configService.get<string>('OPENAI_API_KEY'),
+      apiKey: process.env.OPENAI_API_KEY ?? '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',
     });
   }
 
@@ -41,7 +39,7 @@ export class AiService {
         model,
         temperature,
         maxTokens,
-        schema,
+        // schema,
       });
     }
 

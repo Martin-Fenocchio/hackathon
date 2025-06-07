@@ -1,20 +1,21 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
 import { Injectable, HttpException, HttpStatus, Logger, Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
-import { WhatsAppMessageType } from '../enum/message.types.enum';
-import { SimpleIncomingMessageContent, SimpleIncomingMessagePayload } from '../dto/whatsapp.message.dto';
-import { WhatsappApiService } from './whatsapp.api.service';
+import { SimpleIncomingMessageContent } from '../../whatsapp/dto/whatsapp.message.dto';
+import { WhatsappApiService } from '../../whatsapp/service/whatsapp.api.service';
 import { AiService } from '../../ai/ai.service';
 import { OpenAIModel } from 'src/ai/enum/models.enum';
 import { AIRole } from 'src/ai/enum/roles.enum';
 import { AIMessage } from '../../ai/dto/message.dto';
 import nutritionalAnalysisPrompt from '../../ai/utils/prompt/agent.prompt';
 import imageDescriptionPrompt from '../../ai/utils/prompt/imageDescription.prompt';
-import { nutritionalAnalysisSchema } from '../../ai/schema';
+// import { nutritionalAnalysisSchema } from '../../ai/schema';
 import { ConversationMessage } from '../../ai/interfaces/completions';
 
 @Injectable()
@@ -55,7 +56,7 @@ export class WhatsAppService {
 
     return parseInt(challenge);
   }
-
+  /* 
   async handleWebhookPost(message: SimpleIncomingMessagePayload): Promise<{ status: number }> {
     try {
       if (message?.phoneNumberId !== this.phoneNumberId) {
@@ -76,8 +77,8 @@ export class WhatsAppService {
       return { status: 200 };
     }
   }
-
-  private async processMessage(message: SimpleIncomingMessagePayload): Promise<void> {
+ */
+  /*  private async processMessage(message: SimpleIncomingMessagePayload): Promise<void> {
     const messageId = message.messageId || 'unknown';
     const phoneNumber = message.phoneNumber;
 
@@ -120,7 +121,7 @@ export class WhatsAppService {
       await this.handleProcessingError(error, messageId, phoneNumber);
     }
   }
-
+ */
   private async handleProcessingError(error: unknown, messageId: string, phoneNumber: string): Promise<void> {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     const errorStack = error instanceof Error ? error.stack : undefined;
@@ -180,7 +181,7 @@ export class WhatsAppService {
         ],
         model: OpenAIModel.GPT4O_MINI,
         maxTokens: 800,
-        schema: nutritionalAnalysisSchema,
+        //schema: nutritionalAnalysisSchema,
       });
 
       this.addToConversationHistory(phoneNumber, AIRole.ASSISTANT, response.responseText);
@@ -207,7 +208,7 @@ export class WhatsAppService {
     }
   }
 
-  private async handleMediaMessage(
+  /*  private async handleMediaMessage(
     phoneNumber: string,
     messageContent: SimpleIncomingMessageContent,
     message: SimpleIncomingMessagePayload,
@@ -243,9 +244,9 @@ export class WhatsAppService {
         message,
       );
     }
-  }
+  } */
 
-  private async processImageWithAI(
+  /*   private async processImageWithAI(
     messageContent: SimpleIncomingMessageContent,
     phoneNumber?: string,
   ): Promise<string> {
@@ -306,7 +307,7 @@ export class WhatsAppService {
       this.logger.error('Error processing image with AI:', error);
       return '📸 He recibido tu imagen, pero no pude analizarla en este momento. Por favor intenta más tarde.';
     }
-  }
+  } */
 
   private async processAudioWithAI(messageContent: SimpleIncomingMessageContent, phoneNumber: string): Promise<string> {
     try {
@@ -336,7 +337,7 @@ export class WhatsAppService {
         model: OpenAIModel.GPT4O_MINI,
         temperature: 0.2,
         maxTokens: 1200,
-        schema: nutritionalAnalysisSchema,
+        //schema: nutritionalAnalysisSchema,
       });
 
       return response.responseText;
