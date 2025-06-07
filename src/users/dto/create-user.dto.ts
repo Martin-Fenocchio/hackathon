@@ -1,5 +1,5 @@
 export class CreateUserDto {
-    telephone: string;
-    privatekey: string;
-    publickey: string;
-} 
+  telephone: string;
+  privatekey: string;
+  publickey: string;
+}
