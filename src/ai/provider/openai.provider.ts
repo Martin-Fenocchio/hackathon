@@ -15,7 +15,7 @@ export class OpenAIProvider {
 
   constructor(private readonly configService: ConfigService) {
     this.openAI = new OpenAI({
-      apiKey: this.configService.get<string>('OPENAI_API_KEY'),
+      apiKey: process.env.OPENAI_API_KEY ?? '',
     });
   }
 

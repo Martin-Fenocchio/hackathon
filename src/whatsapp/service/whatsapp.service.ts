@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
@@ -55,7 +58,7 @@ export class WhatsAppService {
 
     return parseInt(challenge);
   }
-
+  /* 
   async handleWebhookPost(message: SimpleIncomingMessagePayload): Promise<{ status: number }> {
     try {
       if (message?.phoneNumberId !== this.phoneNumberId) {
@@ -76,8 +79,8 @@ export class WhatsAppService {
       return { status: 200 };
     }
   }
-
-  private async processMessage(message: SimpleIncomingMessagePayload): Promise<void> {
+ */
+  /*  private async processMessage(message: SimpleIncomingMessagePayload): Promise<void> {
     const messageId = message.messageId || 'unknown';
     const phoneNumber = message.phoneNumber;
 
@@ -120,7 +123,7 @@ export class WhatsAppService {
       await this.handleProcessingError(error, messageId, phoneNumber);
     }
   }
-
+ */
   private async handleProcessingError(error: unknown, messageId: string, phoneNumber: string): Promise<void> {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     const errorStack = error instanceof Error ? error.stack : undefined;
@@ -207,7 +210,7 @@ export class WhatsAppService {
     }
   }
 
-  private async handleMediaMessage(
+  /*  private async handleMediaMessage(
     phoneNumber: string,
     messageContent: SimpleIncomingMessageContent,
     message: SimpleIncomingMessagePayload,
@@ -243,9 +246,9 @@ export class WhatsAppService {
         message,
       );
     }
-  }
+  } */
 
-  private async processImageWithAI(
+  /*   private async processImageWithAI(
     messageContent: SimpleIncomingMessageContent,
     phoneNumber?: string,
   ): Promise<string> {
@@ -306,7 +309,7 @@ export class WhatsAppService {
       this.logger.error('Error processing image with AI:', error);
       return '📸 He recibido tu imagen, pero no pude analizarla en este momento. Por favor intenta más tarde.';
     }
-  }
+  } */
 
   private async processAudioWithAI(messageContent: SimpleIncomingMessageContent, phoneNumber: string): Promise<string> {
     try {
