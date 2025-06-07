@@ -22,7 +22,7 @@ export class AiService {
   ) {
     this.openai = new OpenAI({
       apiKey:
-        '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',
+        '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',
     });
   }
 
