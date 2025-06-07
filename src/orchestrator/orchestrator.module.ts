@@ -6,9 +6,10 @@ import { ContactsModule } from '../contacts/contacts.module';
 import { AiModule } from '../ai/ai.module';
 import { TransfersModule } from 'src/transfers/transfers.module';
 import { VoucherModule } from '../voucher/voucher.module';
+import { SolanaModule } from 'src/solana/solana.module';
 
 @Module({
-  imports: [SolverModule, ContactsModule, AiModule, TransfersModule, VoucherModule],
+  imports: [SolverModule, ContactsModule, AiModule, TransfersModule, VoucherModule, SolanaModule],
   controllers: [OrchestratorController],
   providers: [OrchestratorService],
   exports: [OrchestratorService],
