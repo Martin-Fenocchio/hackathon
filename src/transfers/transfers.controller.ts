@@ -29,7 +29,7 @@ export class TransfersController {
     }
 
     @Put('confirm_last_pending_transfer')
-    async confirmTransfer(): Promise<Transfer> {
-        return this.transfersService.confirmTransfer();
+    async confirmLastPendingTransfer(): Promise<Transfer> {
+        return this.transfersService.confirmLastPendingTransfer();
     }
 } 

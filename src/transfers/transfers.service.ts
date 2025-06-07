@@ -61,7 +61,7 @@ export class TransfersService {
         return data;
     }
 
-    async confirmTransfer(): Promise<Transfer> {
+    async confirmLastPendingTransfer(): Promise<Transfer> {
         const { data: lastTransfer, error: findError } = await this.databaseService
             .getClient()
             .from('transfers')
