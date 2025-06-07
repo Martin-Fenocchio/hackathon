@@ -17,13 +17,13 @@ export class OrchestratorController {
 
   @Post('orchestrate_confirm_transfer')
   async orchestrateConfirmTransfer(@Body() body: { telephone: string }, @Res() res: Response): Promise<void> {
-    const { transfer, voucherImage } = await this.orchestratorService.orchestrateConfirmTransfer(body.telephone);
+    /* const { voucherImage } = await this.orchestratorService.orchestrateConfirmTransfer(body.telephone);
 
     res.set({
       'Content-Type': 'image/png',
-      'Content-Disposition': `attachment; filename="transfer-voucher-${transfer.transferid}.png"`,
+      'Content-Disposition': `attachment; filename="transfer-voucher-.png"`,
     });
 
-    res.send(voucherImage);
+    res.send(voucherImage); */
   }
 }
