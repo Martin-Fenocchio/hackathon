@@ -1,8 +1,11 @@
-export interface SolverResult {
+export interface TextSolverResult {
     recipient: {
         type: 'publicKey' | 'contactName';
         value: string;
     };
     amount: number;
-    confidence: number;
 } 
+
+export interface RecipientSolverResult {
+	publicKey: string;
+}
