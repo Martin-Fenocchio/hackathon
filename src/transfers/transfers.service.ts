@@ -69,6 +69,27 @@ export class TransfersService {
     return data;
   }
 
+  async findLastByUser(telephone: string): Promise<Transfer | null> {
+    const { data, error } = await this.databaseService
+      .getClient()
+      .from('transfers')
+      .select('*')
+      .eq('telephone', telephone)
+      .not('transferid', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null;
+      }
+      throw new Error(`Failed to find last transfer: ${error.message}`);
+    }
+
+    return data;
+  }
+
   async confirmLastPendingTransfer(telephone: string): Promise<Transfer> {
     const { data: lastTransfer, error: findError } = await this.databaseService
       .getClient()
