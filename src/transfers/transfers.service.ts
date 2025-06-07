@@ -61,12 +61,13 @@ export class TransfersService {
         return data;
     }
 
-    async confirmLastPendingTransfer(): Promise<Transfer> {
+    async confirmLastPendingTransfer(telephone: string): Promise<Transfer> {
         const { data: lastTransfer, error: findError } = await this.databaseService
             .getClient()
             .from('transfers')
             .select('*')
             .is('transferid', null)
+            .eq('telephone', telephone)
             .order('created_at', { ascending: false })
             .limit(1)
             .single();
@@ -82,7 +83,7 @@ export class TransfersService {
         const { data, error } = await this.databaseService
             .getClient()
             .from('transfers')
-            .update({ transferid: '123456' })
+            .update({ transferid: Math.random().toString(36).substring(2, 15) })
             .eq('id', lastTransfer.id)
             .select()
             .single();

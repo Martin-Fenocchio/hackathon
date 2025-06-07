@@ -53,7 +53,8 @@ export class SolverService {
 		{
 			"publicKey": "the matching public key",
 			"confidence": number between 0 and 1
-		}`;
+		}.
+		Only return the JSON, nothing else.`;
 
 		const result = await this.aiService.chat({
 			messages: [
@@ -66,6 +67,7 @@ export class SolverService {
 			temperature: 0.1,
 		});
 
-		return JSON.parse(result.content);
+		const parsedResult = JSON.parse(result) as RecipientSolverResult;
+		return parsedResult;
 	}
 } 

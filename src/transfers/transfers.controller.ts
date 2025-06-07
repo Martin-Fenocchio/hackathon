@@ -28,8 +28,8 @@ export class TransfersController {
         return this.transfersService.findOne(transferid);
     }
 
-    @Put('confirm_last_pending_transfer')
-    async confirmLastPendingTransfer(): Promise<Transfer> {
-        return this.transfersService.confirmLastPendingTransfer();
+    @Post('confirm_last_pending_transfer')
+    async confirmLastPendingTransfer(@Body() body: { telephone: string }): Promise<Transfer> {
+        return this.transfersService.confirmLastPendingTransfer(body.telephone);
     }
 } 

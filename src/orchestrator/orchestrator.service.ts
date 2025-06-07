@@ -38,7 +38,6 @@ export class OrchestratorService {
 			destination.publicKey,
 		);
 
-        console.log(transfer);
 
 		return {
 			recipient: {
