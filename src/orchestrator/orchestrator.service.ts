@@ -13,6 +13,7 @@ import { RecipientSolverResult } from 'src/solver/interfaces/solver-result.inter
 import { VoucherService } from '../voucher/voucher.service';
 import { SolanaService } from 'src/solana/solana.service';
 import { UsersService } from 'src/users/users.service';
+import { Contact } from 'src/contacts/entities/contact.entity';
 @Injectable()
 export class OrchestratorService {
   constructor(
@@ -80,6 +81,15 @@ export class OrchestratorService {
 
     return {
       voucherImage,
+    };
+  }
+
+  async orchestrateCreateContact(payload: { telephone: string, name: string }): Promise<{ contact: Contact }> {    
+    const transfer = await this.transfersService.findLastByUser(payload.telephone);
+    const contact = await this.contactsService.create(payload.telephone, payload.name, transfer!.destination_publickey);
+
+    return {
+      contact,
     };
   }
 }
