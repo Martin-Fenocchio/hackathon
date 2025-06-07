@@ -1,5 +1,5 @@
 import { Controller, Get, Query, Body, HttpCode, HttpStatus } from '@nestjs/common';
-import { WhatsAppService } from '../whatsApp/service/whatsapp.service';
+import { WhatsAppService } from './service/whatsapp.service';
 
 @Controller('whatsapp')
 export class WhatsAppController {
