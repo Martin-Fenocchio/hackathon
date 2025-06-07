@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable } from '@nestjs/common';
 import {
   Connection,
@@ -17,10 +14,7 @@ export class SolanaService {
   private readonly connection: Connection;
 
   constructor() {
-    this.connection = new Connection(
-      'https://api.devnet.solana.com',
-      'confirmed',
-    );
+    this.connection = new Connection('https://api.devnet.solana.com', 'confirmed');
   }
 
   createWallet() {
@@ -40,10 +34,9 @@ export class SolanaService {
     toPublicKey: string;
     amountSol: number;
   }) {
-    const fromKeypair = Keypair.fromSecretKey(
-      Buffer.from(fromSecretKey, 'base64'),
-    );
+    const fromKeypair = Keypair.fromSecretKey(Buffer.from(fromSecretKey, 'base64'));
     const toPubKey = new PublicKey(toPublicKey);
+
     const transaction = new Transaction().add(
       SystemProgram.transfer({
         fromPubkey: fromKeypair.publicKey,
@@ -51,11 +44,8 @@ export class SolanaService {
         lamports: amountSol * LAMPORTS_PER_SOL,
       }),
     );
-    const signature = await sendAndConfirmTransaction(
-      this.connection,
-      transaction,
-      [fromKeypair],
-    );
-    return { signature, transaction };
+    const signature = await sendAndConfirmTransaction(this.connection, transaction, [fromKeypair]);
+
+    return { transferenceID: signature };
   }
 }
