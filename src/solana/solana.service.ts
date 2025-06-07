@@ -1,6 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { Connection, Keypair, PublicKey } from '@solana/web3.js';
-import { getOrCreateAssociatedTokenAccount, transfer as splTransfer, getMint, mintTo } from '@solana/spl-token';
+import { clusterApiUrl, Connection, Keypair, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
+import {
+  getOrCreateAssociatedTokenAccount,
+  transfer as splTransfer,
+  getMint,
+  mintTo,
+  getAccount,
+} from '@solana/spl-token';
 
 const TOKEN_MINT_ADDRESS = '5LaS3B9mNKrqj2JuFLFezyKFrfhg2uP3fg85z6dffyoS';
 const MINT_AUTHORITY_BASE64 =
@@ -52,7 +58,6 @@ export class SolanaService {
       message: `Minted 10,000 ${mint.toBase58()} tokens`,
     };
   }
-
   async transferToken({
     fromSecretKey,
     toPublicKey,
@@ -62,27 +67,47 @@ export class SolanaService {
     toPublicKey: string;
     amount: number;
   }) {
+    const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
     const fromKeypair = Keypair.fromSecretKey(Buffer.from(fromSecretKey, 'base64'));
     const toPubKey = new PublicKey(toPublicKey);
     const mint = new PublicKey(TOKEN_MINT_ADDRESS);
 
-    // 1. Obtener info del token (para saber cuántos decimales tiene)
-    const mintInfo = await getMint(this.connection, mint);
+    // 1. Validar saldo en SOL
+    const solBalance = await connection.getBalance(fromKeypair.publicKey);
+    console.log('💰 Sender SOL balance:', solBalance / LAMPORTS_PER_SOL);
+
+    if (solBalance < 0.002 * LAMPORTS_PER_SOL) {
+      console.log('⚠️ Sender sin SOL. Pidiendo airdrop...');
+      await connection.requestAirdrop(fromKeypair.publicKey, 2 * LAMPORTS_PER_SOL);
+      await new Promise((res) => setTimeout(res, 3000)); // pequeña espera para que se confirme
+    }
+
+    // 2. Obtener info del token
+    const mintInfo = await getMint(connection, mint);
     const amountInBaseUnits = BigInt(amount * 10 ** mintInfo.decimals);
 
-    // 2. Obtener (o crear) cuentas asociadas de token
+    // 3. Obtener cuenta del emisor
     const fromTokenAccount = await getOrCreateAssociatedTokenAccount(
-      this.connection,
+      connection,
       fromKeypair,
       mint,
       fromKeypair.publicKey,
     );
 
-    const toTokenAccount = await getOrCreateAssociatedTokenAccount(this.connection, fromKeypair, mint, toPubKey);
+    const fromAccountInfo = await getAccount(connection, fromTokenAccount.address);
+    console.log('🏦 FROM token balance:', fromAccountInfo.amount.toString());
 
-    // 3. Transferencia
+    // 4. Obtener o crear cuenta del receptor
+    const toTokenAccount = await getOrCreateAssociatedTokenAccount(
+      connection,
+      fromKeypair, // payer de la creación
+      mint,
+      toPubKey,
+    );
+
+    // 6. Transferencia
     const signature = await splTransfer(
-      this.connection,
+      connection,
       fromKeypair,
       fromTokenAccount.address,
       toTokenAccount.address,
@@ -90,6 +115,7 @@ export class SolanaService {
       amountInBaseUnits,
     );
 
+    console.log('✅ Transferencia confirmada. Signature:', signature);
     return { transferenceID: signature };
   }
 }

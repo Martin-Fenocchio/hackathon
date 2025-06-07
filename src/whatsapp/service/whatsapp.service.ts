@@ -24,7 +24,7 @@ import { SolanaService } from 'src/solana/solana.service';
 import { OrchestratorService } from 'src/orchestrator/orchestrator.service';
 import { UsersService } from 'src/users/users.service';
 import { TransfersService } from 'src/transfers/transfers.service';
-
+import { ContactsService } from 'src/contacts/contacts.service';
 @Injectable()
 export class WhatsAppService {
   private readonly verificationToken: string;
@@ -42,6 +42,7 @@ export class WhatsAppService {
     private readonly orchestratorService: OrchestratorService,
     private readonly usersService: UsersService,
     private readonly transfersService: TransfersService,
+    private readonly contactsService: ContactsService,
   ) {
     this.verificationToken = 'hackathon';
     this.phoneNumberId = '720551657798613';
@@ -347,6 +348,18 @@ export class WhatsAppService {
           }
           throw error;
         }
+
+        await this.whatsappApiService.sendTextMessage(
+          message.phoneNumber,
+          `Cual es el nombre del contacto que quieres agendar?`,
+        );
+        
+
+        break;
+      }
+
+      case 'si_agendar_contact': {
+        await this.contactsService.create(message.phoneNumber, message.text);
 
         break;
       }
