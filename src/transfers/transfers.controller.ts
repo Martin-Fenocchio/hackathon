@@ -28,11 +28,8 @@ export class TransfersController {
         return this.transfersService.findOne(transferid);
     }
 
-    @Put(':id/transferid')
-    async updateTransferId(
-        @Param('id') id: string,
-        @Body() updateTransferDto: UpdateTransferDto,
-    ): Promise<Transfer> {
-        return this.transfersService.updateTransferId(Number(id), updateTransferDto.transferid);
+    @Put('confirm_last_pending_transfer')
+    async confirmTransfer(): Promise<Transfer> {
+        return this.transfersService.confirmTransfer();
     }
 } 

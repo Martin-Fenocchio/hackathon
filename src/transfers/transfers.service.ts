@@ -61,21 +61,34 @@ export class TransfersService {
         return data;
     }
 
-    async updateTransferId(id: number, transferid: string): Promise<Transfer> {
+    async confirmTransfer(): Promise<Transfer> {
+        const { data: lastTransfer, error: findError } = await this.databaseService
+            .getClient()
+            .from('transfers')
+            .select('*')
+            .is('transferid', null)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+        if (findError) {
+            throw new Error(`Failed to find last pending transfer: ${findError.message}`);
+        }
+
+        if (!lastTransfer) {
+            throw new Error('No pending transfers found');
+        }
+
         const { data, error } = await this.databaseService
             .getClient()
             .from('transfers')
-            .update({ transferid })
-            .eq('id', id)
+            .update({ transferid: '123456' })
+            .eq('id', lastTransfer.id)
             .select()
             .single();
 
         if (error) {
             throw new Error(`Failed to update transfer: ${error.message}`);
-        }
-
-        if (!data) {
-            throw new Error('Transfer not found');
         }
 
         return data;
