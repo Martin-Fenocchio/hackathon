@@ -5,20 +5,17 @@ import { Response } from 'express';
 
 @Controller('voucher')
 export class VoucherController {
-    constructor(private readonly voucherService: VoucherService) {}
+  constructor(private readonly voucherService: VoucherService) {}
 
-    @Post('generate')
-    async generateVoucher(
-        @Body() transfer: Transfer,
-        @Res() res: Response,
-    ): Promise<void> {
-        const voucherImage = await this.voucherService.generateVoucherImage(transfer);
-        
-        res.set({
-            'Content-Type': 'image/png',
-            'Content-Disposition': `attachment; filename="transfer-voucher-${transfer.transferid}.png"`,
-        });
-        
-        res.send(voucherImage);
-    }
-} 
+  @Post('generate')
+  async generateVoucher(@Body() transfer: Transfer, @Res() res: Response): Promise<void> {
+    const voucherImage = await this.voucherService.generateVoucherImage(transfer);
+
+    res.set({
+      'Content-Type': 'image/png',
+      'Content-Disposition': `attachment; filename="transfer-voucher-${transfer.transferid}.png"`,
+    });
+
+    res.send(voucherImage);
+  }
+}
