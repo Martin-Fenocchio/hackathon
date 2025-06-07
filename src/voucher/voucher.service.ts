@@ -55,7 +55,7 @@ export class VoucherService {
       const templateData = {
         coinType: '$PESOS',
         amount: transfer.amount.toLocaleString('es-AR'),
-        transferid: transfer.transferid,
+        transferid: transfer.transferid.slice(0, 30),
         destination_publickey: transfer.destination_publickey,
         date: new Date().toLocaleString('es-AR'),
       };
