@@ -8,9 +8,9 @@
 import { Injectable, HttpException, HttpStatus, Logger, Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
-import { WhatsAppMessageType } from '../enum/message.types.enum';
-import { SimpleIncomingMessageContent, SimpleIncomingMessagePayload } from '../dto/whatsapp.message.dto';
-import { WhatsappApiService } from './whatsapp.api.service';
+import { WhatsAppMessageType } from '../../whatsApp/enum/message.types.enum';
+import { SimpleIncomingMessageContent, SimpleIncomingMessagePayload } from '../../whatsApp/dto/whatsapp.message.dto';
+import { WhatsappApiService } from '../../whatsApp/service/whatsapp.api.service';
 import { AiService } from '../../ai/ai.service';
 import { OpenAIModel } from 'src/ai/enum/models.enum';
 import { AIRole } from 'src/ai/enum/roles.enum';

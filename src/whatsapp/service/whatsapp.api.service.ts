@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
@@ -12,8 +13,8 @@ import {
   SimpleOutgoingMessage,
   SimpleIncomingMessageContent,
   SimpleIncomingMessagePayload,
-} from '../dto/whatsapp.message.dto';
-import { WhatsAppMessageType } from '../enum/message.types.enum';
+} from '../../whatsApp/dto/whatsapp.message.dto';
+import { WhatsAppMessageType } from '../../whatsApp/enum/message.types.enum';
 
 @Injectable()
 export class WhatsappApiService {
@@ -43,29 +44,43 @@ export class WhatsappApiService {
    * @param outgoingMessage Mensaje a enviar
    * @returns ID del mensaje enviado
    */
-  public async sendMessage(outgoingMessage: SimpleOutgoingMessage): Promise<string> {
-    this.logger.debug(`Enviando message tipo ${outgoingMessage.type} a ${outgoingMessage.to}`);
+  public async sendMessage(
+    outgoingMessage: SimpleOutgoingMessage,
+  ): Promise<string> {
+    this.logger.debug(
+      `Enviando message tipo ${outgoingMessage.type} a ${outgoingMessage.to}`,
+    );
 
     try {
       const response = await firstValueFrom(
-        this.httpService.post(`${this.baseEndpoint}/${this.phoneNumberId}/messages`, outgoingMessage, {
-          headers: {
-            Authorization: `Bearer ${this.accessToken}`,
-            'Content-Type': 'application/json',
+        this.httpService.post(
+          `${this.baseEndpoint}/${this.phoneNumberId}/messages`,
+          outgoingMessage,
+          {
+            headers: {
+              Authorization: `Bearer ${this.accessToken}`,
+              'Content-Type': 'application/json',
+            },
           },
-        }),
+        ),
       );
 
       const messageId = (response.data as any)?.messages?.[0]?.id;
       this.logger.debug(`Mensaje enviado con ID: ${messageId}`);
       return messageId;
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error?.message || 'Error desconocido';
-      const errorDetails = error.response?.data?.error?.error_data?.details || 'Sin detalles';
+      const errorMessage =
+        error.response?.data?.error?.message || 'Error desconocido';
+      const errorDetails =
+        error.response?.data?.error?.error_data?.details || 'Sin detalles';
 
-      this.logger.error(`Error enviando message tipo ${outgoingMessage.type} a ${outgoingMessage.to}: ${errorMessage}`);
+      this.logger.error(
+        `Error enviando message tipo ${outgoingMessage.type} a ${outgoingMessage.to}: ${errorMessage}`,
+      );
 
-      throw new Error(`Error enviando message: ${errorMessage}. Detalles: ${errorDetails}`);
+      throw new Error(
+        `Error enviando message: ${errorMessage}. Detalles: ${errorDetails}`,
+      );
     }
   }
 
@@ -117,7 +132,9 @@ export class WhatsappApiService {
     incomingMessage?: SimpleIncomingMessagePayload,
   ): Promise<string> {
     if (!sendTo || !mediaId || !mediaType) {
-      throw new Error('El destinatario, ID de media y tipo de media son requeridos');
+      throw new Error(
+        'El destinatario, ID de media y tipo de media son requeridos',
+      );
     }
 
     if (!['image', 'audio'].includes(mediaType)) {
@@ -149,7 +166,9 @@ export class WhatsappApiService {
    * @param message Mensaje entrante de WhatsApp
    * @returns Contenido estructurado del mensaje
    */
-  public async getMessageContent(message: SimpleIncomingMessagePayload): Promise<{
+  public async getMessageContent(
+    message: SimpleIncomingMessagePayload,
+  ): Promise<{
     incomingMessageContent: SimpleIncomingMessageContent;
   }> {
     let incomingMessageContent: SimpleIncomingMessageContent;
@@ -201,8 +220,13 @@ export class WhatsappApiService {
 
       return { incomingMessageContent };
     } catch (error: any) {
-      this.logger.error(`Error procesando message entrante: ${error.message}`, error.stack);
-      throw new Error(`Error procesando message tipo ${message.type}: ${error.message}`);
+      this.logger.error(
+        `Error procesando message entrante: ${error.message}`,
+        error.stack,
+      );
+      throw new Error(
+        `Error procesando message tipo ${message.type}: ${error.message}`,
+      );
     }
   }
 
@@ -241,7 +265,10 @@ export class WhatsappApiService {
       this.logger.debug(`Archivo descargado exitosamente: ${mediaId}`);
       return Buffer.from(mediaResponse.data as ArrayBuffer);
     } catch (error: any) {
-      this.logger.error(`Error descargando archivo ${mediaId}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error descargando archivo ${mediaId}: ${error.message}`,
+        error.stack,
+      );
       throw new Error(`Error descargando archivo multimedia: ${error.message}`);
     }
   }
@@ -264,24 +291,34 @@ export class WhatsappApiService {
       this.logger.debug(`Subiendo archivo: ${filePath}`);
 
       const response = await firstValueFrom(
-        this.httpService.post(`${this.baseEndpoint}/${this.phoneNumberId}/media`, formData, {
-          headers: {
-            Authorization: `Bearer ${this.accessToken}`,
-            ...formData.getHeaders(),
+        this.httpService.post(
+          `${this.baseEndpoint}/${this.phoneNumberId}/media`,
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${this.accessToken}`,
+              ...formData.getHeaders(),
+            },
           },
-        }),
+        ),
       );
 
       const mediaId = (response.data as any)?.id;
       this.logger.debug(`Archivo subido con ID: ${mediaId}`);
       return mediaId;
     } catch (error: any) {
-      this.logger.error(`Error subiendo archivo ${filePath}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error subiendo archivo ${filePath}: ${error.message}`,
+        error.stack,
+      );
       throw new Error(`Error subiendo archivo: ${error.message}`);
     }
   }
 
-  public async sendTypingIndicator(messageId: string, phoneNumber: string): Promise<boolean> {
+  public async sendTypingIndicator(
+    messageId: string,
+    phoneNumber: string,
+  ): Promise<boolean> {
     try {
       await firstValueFrom(
         this.httpService.post(
@@ -306,8 +343,11 @@ export class WhatsappApiService {
       );
 
       return true;
-    } catch (error) {
-      this.logger.error(`Error sending typing indicator: ${error.message}`, error.stack);
+    } catch (error: any) {
+      this.logger.error(
+        `Error sending typing indicator: ${error.message}`,
+        error.stack,
+      );
       return false;
     }
   }
