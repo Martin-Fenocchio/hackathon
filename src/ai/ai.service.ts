@@ -31,7 +31,6 @@ export class AiService {
     model,
     temperature,
     maxTokens,
-    schema,
   }: OpenAIOptionsDto): Promise<any> {
     if (provider === AIProvider.OPENAI) {
       return await this.openAIProvider.getChatCompletion<T>({

@@ -1,13 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
 import { Injectable, HttpException, HttpStatus, Logger, Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { SimpleIncomingMessageContent } from '../../whatsapp/dto/whatsapp.message.dto';
+import { SimpleIncomingMessageContent, SimpleIncomingMessagePayload } from '../../whatsapp/dto/whatsapp.message.dto';
 import { WhatsappApiService } from '../../whatsapp/service/whatsapp.api.service';
 import { AiService } from '../../ai/ai.service';
 import { OpenAIModel } from 'src/ai/enum/models.enum';
@@ -15,8 +15,8 @@ import { AIRole } from 'src/ai/enum/roles.enum';
 import { AIMessage } from '../../ai/dto/message.dto';
 import nutritionalAnalysisPrompt from '../../ai/utils/prompt/agent.prompt';
 import imageDescriptionPrompt from '../../ai/utils/prompt/imageDescription.prompt';
-// import { nutritionalAnalysisSchema } from '../../ai/schema';
 import { ConversationMessage } from '../../ai/interfaces/completions';
+import { WhatsAppMessageType } from '../enum/message.types.enum';
 
 @Injectable()
 export class WhatsAppService {
@@ -33,21 +33,12 @@ export class WhatsAppService {
     private readonly aiService: AiService,
   ) {
     this.verificationToken = 'hackathon';
-    this.phoneNumberId = this.configService.get<string>('WHATSAPP_PHONE_NUMBER_ID') || '';
-
-    this.validateConfiguration();
-  }
-
-  private validateConfiguration(): void {
-    if (!this.phoneNumberId) {
-      this.logger.warn('Missing WHATSAPP_PHONE_NUMBER_ID');
-    }
+    this.phoneNumberId = '720551657798613';
   }
 
   verifyWebhook(mode: string, token: string, challenge: string): number {
-    this.logger.debug(`Verifying webhook - Mode: ${mode}, Token: ${token}`);
-
     console.log('verifyWebhook', mode, token, challenge);
+    this.logger.debug(`Verifying webhook - Mode: ${mode}, Token: ${token}`);
 
     if (mode !== 'subscribe' || token !== 'hackathon') {
       this.logger.warn(`Webhook verification failed: invalid token`);
@@ -56,7 +47,7 @@ export class WhatsAppService {
 
     return parseInt(challenge);
   }
-  /* 
+
   async handleWebhookPost(message: SimpleIncomingMessagePayload): Promise<{ status: number }> {
     try {
       if (message?.phoneNumberId !== this.phoneNumberId) {
@@ -77,8 +68,7 @@ export class WhatsAppService {
       return { status: 200 };
     }
   }
- */
-  /*  private async processMessage(message: SimpleIncomingMessagePayload): Promise<void> {
+  private async processMessage(message: SimpleIncomingMessagePayload): Promise<void> {
     const messageId = message.messageId || 'unknown';
     const phoneNumber = message.phoneNumber;
 
@@ -121,7 +111,7 @@ export class WhatsAppService {
       await this.handleProcessingError(error, messageId, phoneNumber);
     }
   }
- */
+
   private async handleProcessingError(error: unknown, messageId: string, phoneNumber: string): Promise<void> {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     const errorStack = error instanceof Error ? error.stack : undefined;
@@ -171,7 +161,7 @@ export class WhatsAppService {
         messages: [
           {
             role: AIRole.SYSTEM,
-            content: nutritionalAnalysisPrompt,
+            content: 'Responde hola',
           },
           ...history,
           {
@@ -181,12 +171,11 @@ export class WhatsAppService {
         ],
         model: OpenAIModel.GPT4O_MINI,
         maxTokens: 800,
-        //schema: nutritionalAnalysisSchema,
       });
 
-      this.addToConversationHistory(phoneNumber, AIRole.ASSISTANT, response.responseText);
+      this.addToConversationHistory(phoneNumber, AIRole.ASSISTANT, response);
 
-      await this.whatsappApiService.sendTextMessage(phoneNumber, response.responseText);
+      await this.whatsappApiService.sendTextMessage(phoneNumber, response);
     } catch (error) {
       this.logger.error('Error procesando mensaje de texto:', error);
       await this.whatsappApiService.sendTextMessage(
@@ -208,7 +197,7 @@ export class WhatsAppService {
     }
   }
 
-  /*  private async handleMediaMessage(
+  private async handleMediaMessage(
     phoneNumber: string,
     messageContent: SimpleIncomingMessageContent,
     message: SimpleIncomingMessagePayload,
@@ -244,9 +233,9 @@ export class WhatsAppService {
         message,
       );
     }
-  } */
+  }
 
-  /*   private async processImageWithAI(
+  private async processImageWithAI(
     messageContent: SimpleIncomingMessageContent,
     phoneNumber?: string,
   ): Promise<string> {
@@ -282,20 +271,19 @@ export class WhatsAppService {
         model: OpenAIModel.GPT4O_MINI,
         temperature: 0.2,
         maxTokens: 1200,
-        schema: nutritionalAnalysisSchema,
       });
 
       if (phoneNumber) {
-        await this.addToConversationHistory(phoneNumber, AIRole.USER, `image : ${imageResponse}`);
+        this.addToConversationHistory(phoneNumber, AIRole.USER, `image : ${imageResponse}`);
 
-        await this.addToConversationHistory(
+        this.addToConversationHistory(
           phoneNumber,
           AIRole.ASSISTANT,
           aiResponse?.responseText || 'Análisis de imagen completado',
         );
       }
 
-      const formattedMessage = this.formatNutritionalResponse(aiResponse);
+      const formattedMessage = aiResponse;
 
       try {
         return formattedMessage;
@@ -307,7 +295,7 @@ export class WhatsAppService {
       this.logger.error('Error processing image with AI:', error);
       return '📸 He recibido tu imagen, pero no pude analizarla en este momento. Por favor intenta más tarde.';
     }
-  } */
+  }
 
   private async processAudioWithAI(messageContent: SimpleIncomingMessageContent, phoneNumber: string): Promise<string> {
     try {
@@ -337,7 +325,6 @@ export class WhatsAppService {
         model: OpenAIModel.GPT4O_MINI,
         temperature: 0.2,
         maxTokens: 1200,
-        //schema: nutritionalAnalysisSchema,
       });
 
       return response.responseText;

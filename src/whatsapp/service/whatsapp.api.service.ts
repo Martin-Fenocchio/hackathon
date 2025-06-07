@@ -29,7 +29,7 @@ export class WhatsappApiService {
   ) {
     this.baseEndpoint = this.buildBaseEndpoint();
     this.accessToken =
-      'EAAKoxqZChBtkBO6iSWQOZCA8ldGXZAW5OKMzGZBSMdWSeby8XGXRpuK9xqYRA22TMKzm2m8wkIcZBEJkGYgUgDRshX63X8KUN7FWgsUBtjC8PSch2ye4prM0mhFxZA5Ep3R8RGKB3zFFh5opQUHDE3CeNe5t6c4ZCmskpbiMEAwtZAZBxqRjqDAPS3KLa2U8OTrZAXFgZDZD';
+      'EAAKoxqZChBtkBO61UoSDNUVRqTxZCNOvm03O53OSGHl6ZCzIMZA5he5pVYvFAtLiOUxEqRmBuAlwoht2wTyyDFH1666WayKXH3ZAiMgqzbHjLhhW5rLdXLEZBRiYkEKvOc3fxxsDO86QZB8WADjmw0L8ditrvjMZAWczwMCTzONHllZCuNzGlrTGhYPs5zcGhZAaHHK8wU7xGMMmEBJi1G3mbVfumleZBVzNp4XAGMZD';
     this.phoneNumberId = '720551657798613';
   }
 
@@ -89,7 +89,7 @@ export class WhatsappApiService {
     }
 
     const body: any = {
-      to: sendTo,
+      to: '541126336301',
       text: {
         body: message,
       },
@@ -164,6 +164,8 @@ export class WhatsappApiService {
             text: message.text,
             type: WhatsAppMessageType.TEXT,
           };
+          console.log('incomingMessageContent', JSON.stringify(incomingMessageContent));
+
           break;
 
         case WhatsAppMessageType.IMAGE: {
