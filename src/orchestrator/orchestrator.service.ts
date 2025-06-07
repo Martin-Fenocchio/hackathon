@@ -12,7 +12,7 @@ import { TransfersService } from 'src/transfers/transfers.service';
 import { RecipientSolverResult } from 'src/solver/interfaces/solver-result.interface';
 import { VoucherService } from '../voucher/voucher.service';
 import { SolanaService } from 'src/solana/solana.service';
-
+import { UsersService } from 'src/users/users.service';
 @Injectable()
 export class OrchestratorService {
   constructor(
@@ -21,6 +21,7 @@ export class OrchestratorService {
     private readonly transfersService: TransfersService,
     private readonly voucherService: VoucherService,
     private readonly solanaService: SolanaService,
+    private readonly usersService: UsersService,
   ) {}
 
   async orchestrateTransferText(orchestrateTransferTextDto: OrchestrateTransferTextDto): Promise<OrchestratorResult> {
@@ -36,8 +37,10 @@ export class OrchestratorService {
 
       destination = await this.solverService.solveRecipient(solverResult.recipient.value, contactsList);
     } else {
+      const words = orchestrateTransferTextDto.text.split(' ');
+      const longestWord = words.reduce((longest, current) => (current.length > longest.length ? current : longest));
       destination = {
-        publicKey: solverResult.recipient.value,
+        publicKey: longestWord,
       };
     }
 
@@ -56,20 +59,23 @@ export class OrchestratorService {
     };
   }
 
-  async orchestrateConfirmTransfer(payload: {
-    fromSecretKey: string;
-    toPublicKey: string;
-    amountSol: number;
-    telephone: string;
-  }): Promise<{ voucherImage: Buffer }> {
-    this.transfersService.confirmLastPendingTransfer(payload.telephone);
+  async orchestrateConfirmTransfer(payload: { telephone: string }): Promise<{ voucherImage: Buffer }> {
+    const transfer = await this.transfersService.confirmLastPendingTransfer(payload.telephone);
+    console.log('transfer', transfer);
+    const user = await this.usersService.findOne(payload.telephone);
+    console.log('user', user);
+    const { transferenceID } = await this.solanaService.transferSol({
+      fromSecretKey: user!.privatekey,
+      toPublicKey: transfer.destination_publickey,
+      amountSol: transfer.amount,
+    });
 
-    const { transferenceID } = await this.solanaService.transferSol(payload);
+    console.log('transferenceID', transferenceID);
 
     const voucherImage = await this.voucherService.generateVoucherImage({
       transferid: transferenceID,
-      amount: payload.amountSol,
-      destination_publickey: payload.toPublicKey,
+      amount: transfer.amount,
+      destination_publickey: transfer.destination_publickey,
     });
 
     return {

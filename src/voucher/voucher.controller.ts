@@ -9,7 +9,11 @@ export class VoucherController {
 
   @Post('generate')
   async generateVoucher(@Body() transfer: Transfer, @Res() res: Response): Promise<void> {
-    const voucherImage = await this.voucherService.generateVoucherImage(transfer);
+    const voucherImage = await this.voucherService.generateVoucherImage({
+      amount: transfer.amount,
+      transferid: transfer.transferid!,
+      destination_publickey: transfer.destination_publickey,
+    });
 
     res.set({
       'Content-Type': 'image/png',

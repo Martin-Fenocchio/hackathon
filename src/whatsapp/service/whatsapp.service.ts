@@ -5,6 +5,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
+import * as fs from 'fs';
+import * as path from 'path';
 import { Injectable, HttpException, HttpStatus, Logger, Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SimpleIncomingMessageContent, SimpleIncomingMessagePayload } from '../../whatsapp/dto/whatsapp.message.dto';
@@ -20,6 +22,7 @@ import { WhatsAppMessageType } from '../enum/message.types.enum';
 import { SolanaService } from 'src/solana/solana.service';
 import { OrchestratorService } from 'src/orchestrator/orchestrator.service';
 import { UsersService } from 'src/users/users.service';
+import { TransfersService } from 'src/transfers/transfers.service';
 
 @Injectable()
 export class WhatsAppService {
@@ -37,6 +40,7 @@ export class WhatsAppService {
     private readonly solanaService: SolanaService,
     private readonly orchestratorService: OrchestratorService,
     private readonly usersService: UsersService,
+    private readonly transfersService: TransfersService,
   ) {
     this.verificationToken = 'hackathon';
     this.phoneNumberId = '720551657798613';
@@ -167,7 +171,7 @@ export class WhatsAppService {
     }
 
     // Resto del código existente para mensajes de texto
-    const text = message.text?.toLowerCase() || '';
+    const text = message.text || '';
 
     // Detectar si es el primer mensaje (saludo)
     const isFirstMessage =
@@ -266,8 +270,8 @@ export class WhatsAppService {
     console.log(`Botón presionado: ${buttonId} - ${buttonText || 'Sin título'}`);
 
     switch (buttonId) {
-      case 'create_wallet':
-        const wallet = await this.solanaService.createWallet();
+      case 'create_wallet': {
+        const wallet = this.solanaService.createWallet();
 
         const user = await this.usersService.create(phoneNumber, wallet.secretKey, wallet.publicKey);
 
@@ -282,33 +286,70 @@ export class WhatsAppService {
         this.addToConversationHistory(
           phoneNumber,
           AIRole.ASSISTANT,
-          `¡Perfecto! 🎉 Hemos creado tu wallet.\n\n +
-            🌎 Llave pública: ${wallet.publicKey}\n
-            🔒 Llave privada: ${wallet.secretKey} \n\n
-            ¿Queres enviar pesos a un amigo? 💸 `,
+          `¡Perfecto! 🎉 Hemos creado tu wallet.\n\n` +
+            `🌎 Llave pública: ${wallet.publicKey}\n` +
+            `🔒 Llave privada: ${wallet.secretKey}\n\n` +
+            `¿Queres enviar pesos a un amigo? 💸`,
         );
 
         break;
+      }
 
-      case 'import_wallet':
+      case 'import_wallet': {
         await this.whatsappApiService.sendTextMessage(
           phoneNumber,
-          '💰 Para realizar una transferencia necesito la siguiente información:\n\n' +
-            '1️⃣ Cantidad a transferir\n' +
-            '2️⃣ Dirección de destino\n\n' +
-            'Por favor, envía la cantidad que deseas transferir.',
+          '💼 Para importar tu wallet necesito:\n\n' +
+            '🔑 Tu clave privada (seed phrase)\n\n' +
+            'Por favor, envía tu clave privada de forma segura.',
         );
 
         this.addToConversationHistory(
           phoneNumber,
           AIRole.ASSISTANT,
-          '💰 Para realizar una transferencia necesito la siguiente información:\n\n' +
-            '1️⃣ Cantidad a transferir\n' +
-            '2️⃣ Dirección de destino\n\n' +
-            'Por favor, envía la cantidad que deseas transferir.',
+          '💼 Para importar tu wallet necesito:\n\n' +
+            '🔑 Tu clave privada (seed phrase)\n\n' +
+            'Por favor, envía tu clave privada de forma segura.',
         );
 
         break;
+      }
+
+      case 'si': {
+        const result = await this.orchestratorService.orchestrateConfirmTransfer({ telephone: phoneNumber });
+
+        // Crear archivo temporal del voucher
+        const tempDir = path.join(process.cwd(), 'temp');
+
+        // Crear directorio temporal si no existe
+        if (!fs.existsSync(tempDir)) {
+          fs.mkdirSync(tempDir, { recursive: true });
+        }
+
+        const tempFilePath = path.join(tempDir, `voucher_${Date.now()}.png`);
+
+        // Escribir buffer a archivo temporal
+        fs.writeFileSync(tempFilePath, result.voucherImage);
+
+        try {
+          // Subir la imagen y obtener mediaId
+          const mediaId = await this.whatsappApiService.uploadMedia(tempFilePath);
+
+
+          // Enviar imagen del comprobante
+          await this.whatsappApiService.sendMediaMessage(phoneNumber, mediaId, 'image', 'Comprobante de transferencia');
+
+          // Limpiar archivo temporal
+          fs.unlinkSync(tempFilePath);
+        } catch (error) {
+          // Limpiar archivo temporal en caso de error
+          if (fs.existsSync(tempFilePath)) {
+            fs.unlinkSync(tempFilePath);
+          }
+          throw error;
+        }
+
+        break;
+      }
 
       default:
         await this.whatsappApiService.sendTextMessage(

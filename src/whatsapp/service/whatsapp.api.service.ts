@@ -29,7 +29,7 @@ export class WhatsappApiService {
   ) {
     this.baseEndpoint = this.buildBaseEndpoint();
     this.accessToken =
-      'EAAKoxqZChBtkBO5MPIJM084MJwnUFrnHAuDTLywlRCjybxxb8lW9oRVPZCbLH5InV6ADY24iuAe2QlMZBMKasmhreuBxsXSd1PjrSat6ZAme4X1UiaqHw6RakPLlmawX8gErPkuZCBaFZCl2aQefK1F9eq9fO4xWfyZBzRRULOJS4AAH5wUiCWuDXV08Bp1zGB9PpsULwxEVE45BUKZBg32xhLuKKXjdp8gRpt0ZD';
+      'EAAKoxqZChBtkBO2eCKXR5XCQS3nbiqZALhLACZCYEq2YazqPxZAqGSxTFQEZCh1mr1nxcgnBkxA3Ax0XP8hTvuyH2RWnOw0MKCoKczPRd82YsrQATk9oUgrgeHZBmcP1XGpcwlgeDL8bMdnF1EANzumg2DJYFQniEwTBVZBkogiqBBbopMsZBdk62DAULZC2d66LFj8cnAZCoWPnfZBsp3h1kcJwHHChfepPK8pFeMZD';
     this.phoneNumberId = '720551657798613';
   }
 

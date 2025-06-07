@@ -24,22 +24,49 @@ export class SolverService {
             "amount": number,
             "confidence": number between 0 and 1
         }
-		    Only return the JSON, nothing else.
-        Text to analyze: ${solveTextDto.text}.
+
+        🚨🚨🚨 ABSOLUTELY CRITICAL - READ THIS MULTIPLE TIMES 🚨🚨🚨
+        
+        IF THE RECIPIENT IS A WALLET ADDRESS/PUBLIC KEY:
+        - DO NOT CHANGE ANY LETTERS TO LOWERCASE
+        - DO NOT CHANGE ANY LETTERS TO UPPERCASE  
+        - DO NOT MODIFY THE CASE IN ANY WAY
+        - COPY THE EXACT CHARACTERS AS THEY APPEAR
+        - WALLET ADDRESSES ARE CASE-SENSITIVE
+        
+        EXAMPLES OF WHAT YOU MUST DO:
+        ✅ Input: "Send to ABC123def" → Output: "ABC123def" (EXACT COPY)
+        ✅ Input: "Transfer to xyz456XYZ" → Output: "xyz456XYZ" (EXACT COPY)
+        ✅ Input: "Pay GhJkL9876mNpQ" → Output: "GhJkL9876mNpQ" (EXACT COPY)
+        
+        EXAMPLES OF WHAT YOU MUST NOT DO:
+        ❌ Input: "ABC123def" → Output: "abc123def" (WRONG - changed to lowercase)
+        ❌ Input: "xyz456XYZ" → Output: "XYZ456XYZ" (WRONG - changed case)
+        ❌ Input: "GhJkL9876" → Output: "ghjkl9876" (WRONG - changed to lowercase)
+        
+        REPEAT: PRESERVE EXACT CASE OF WALLET ADDRESSES - NO MODIFICATIONS ALLOWED!
+        
+        Only return the JSON, nothing else.
         `;
+
+    console.log('prompt', prompt);
 
     const result = await this.aiService.chat({
       messages: [
         {
-          role: AIRole.USER,
+          role: AIRole.SYSTEM,
           content: prompt,
         },
+        {
+          role: AIRole.USER,
+          content: `Text to analyze: ${solveTextDto.text}`,
+        },
       ],
-      model: OpenAIModel.GPT4O_MINI,
-      temperature: 0.1,
+      model: OpenAIModel.GPT4_1,
+      temperature: 0,
     });
 
-    // Parse the AI response
+    // Clean the AI response before parsing
     const parsedResult = JSON.parse(result) as TextSolverResult;
 
     return parsedResult;
