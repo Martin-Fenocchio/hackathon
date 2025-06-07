@@ -59,16 +59,16 @@ export class OrchestratorService {
   async orchestrateConfirmTransfer(payload: {
     fromSecretKey: string;
     toPublicKey: string;
-    amountSol: number;
+    amount: number;
     telephone: string;
   }): Promise<{ voucherImage: Buffer }> {
     this.transfersService.confirmLastPendingTransfer(payload.telephone);
 
-    const { transferenceID } = await this.solanaService.transferSol(payload);
+    const { transferenceID } = await this.solanaService.transferToken(payload);
 
     const voucherImage = await this.voucherService.generateVoucherImage({
       transferid: transferenceID,
-      amount: payload.amountSol,
+      amount: payload.amount,
       destination_publickey: payload.toPublicKey,
     });
 
