@@ -5,9 +5,10 @@ import { SolverModule } from '../solver/solver.module';
 import { ContactsModule } from '../contacts/contacts.module';
 import { AiModule } from '../ai/ai.module';
 import { TransfersModule } from 'src/transfers/transfers.module';
+import { VoucherModule } from '../voucher/voucher.module';
 
 @Module({
-    imports: [SolverModule, ContactsModule, AiModule, TransfersModule],
+    imports: [SolverModule, ContactsModule, AiModule, TransfersModule, VoucherModule],
     controllers: [OrchestratorController],
     providers: [OrchestratorService],
     exports: [OrchestratorService],

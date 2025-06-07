@@ -5,6 +5,8 @@ import { OrchestrateTransferTextDto } from './dto/orchestrate-text.dto';
 import { OrchestratorResult } from './interfaces/orchestrator-result.interface';
 import { TransfersService } from 'src/transfers/transfers.service';
 import { RecipientSolverResult } from 'src/solver/interfaces/solver-result.interface';
+import { Transfer } from 'src/transfers/entities/transfer.entity';
+import { VoucherService } from '../voucher/voucher.service';
 
 @Injectable()
 export class OrchestratorService {
@@ -12,6 +14,7 @@ export class OrchestratorService {
         private readonly solverService: SolverService,
         private readonly contactsService: ContactsService,
 		private readonly transfersService: TransfersService,
+        private readonly voucherService: VoucherService,
     ) {}
 
     async orchestrateTransferText(orchestrateTransferTextDto: OrchestrateTransferTextDto): Promise<OrchestratorResult> {
@@ -46,5 +49,15 @@ export class OrchestratorService {
 			},
 			amount: solverResult.amount,
 		}
+    }
+
+    async orchestrateConfirmTransfer(telephone: string): Promise<{ transfer: Transfer; voucherImage: Buffer }> {
+        const transfer = await this.transfersService.confirmLastPendingTransfer(telephone);
+        const voucherImage = await this.voucherService.generateVoucherImage(transfer);
+
+        return {
+            transfer,
+            voucherImage,
+        };
     }
 } 
