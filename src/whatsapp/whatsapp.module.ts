@@ -11,9 +11,10 @@ import { SolanaModule } from 'src/solana/solana.module';
 import { OrchestratorModule } from 'src/orchestrator/orchestrator.module';
 import { UsersModule } from 'src/users/users.module';
 import { TransfersModule } from 'src/transfers/transfers.module';
+import { ContactsModule } from 'src/contacts/contacts.module';
 
 @Module({
-  imports: [HttpModule, ConfigModule, SolanaModule, OrchestratorModule, UsersModule, TransfersModule],
+  imports: [HttpModule, ConfigModule, SolanaModule, OrchestratorModule, UsersModule, TransfersModule, ContactsModule],
   controllers: [WhatsAppController],
   providers: [WhatsappApiService, WhatsAppService, AiService, OpenAIProvider],
   exports: [WhatsappApiService, WhatsAppService],

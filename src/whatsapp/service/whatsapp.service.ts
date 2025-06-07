@@ -353,13 +353,12 @@ export class WhatsAppService {
           message.phoneNumber,
           `Cual es el nombre del contacto que quieres agendar?`,
         );
-        
 
         break;
       }
 
       case 'si_agendar_contact': {
-        await this.contactsService.create(message.phoneNumber, message.text);
+        // await this.contactsService.create(message.phoneNumber, message.text);
 
         break;
       }
