@@ -29,7 +29,7 @@ export class WhatsappApiService {
   ) {
     this.baseEndpoint = this.buildBaseEndpoint();
     this.accessToken =
-      'EAAKoxqZChBtkBO61UoSDNUVRqTxZCNOvm03O53OSGHl6ZCzIMZA5he5pVYvFAtLiOUxEqRmBuAlwoht2wTyyDFH1666WayKXH3ZAiMgqzbHjLhhW5rLdXLEZBRiYkEKvOc3fxxsDO86QZB8WADjmw0L8ditrvjMZAWczwMCTzONHllZCuNzGlrTGhYPs5zcGhZAaHHK8wU7xGMMmEBJi1G3mbVfumleZBVzNp4XAGMZD';
+      'EAAKoxqZChBtkBO2eCKXR5XCQS3nbiqZALhLACZCYEq2YazqPxZAqGSxTFQEZCh1mr1nxcgnBkxA3Ax0XP8hTvuyH2RWnOw0MKCoKczPRd82YsrQATk9oUgrgeHZBmcP1XGpcwlgeDL8bMdnF1EANzumg2DJYFQniEwTBVZBkogiqBBbopMsZBdk62DAULZC2d66LFj8cnAZCoWPnfZBsp3h1kcJwHHChfepPK8pFeMZD';
     this.phoneNumberId = '720551657798613';
   }
 
@@ -148,7 +148,7 @@ export class WhatsappApiService {
 
   /**
    * Procesa el contenido de un mensaje entrante
-   * Solo maneja: TEXTO, IMAGEN y AUDIO
+   * Solo maneja: TEXTO, IMAGEN, AUDIO e INTERACTIVE
    * @param message Mensaje entrante de WhatsApp
    * @returns Contenido estructurado del mensaje
    */
@@ -165,7 +165,18 @@ export class WhatsappApiService {
             type: WhatsAppMessageType.TEXT,
           };
           console.log('incomingMessageContent', JSON.stringify(incomingMessageContent));
+          break;
 
+        case WhatsAppMessageType.INTERACTIVE:
+          incomingMessageContent = {
+            text: message.buttonPressed || 'button_pressed',
+            type: WhatsAppMessageType.INTERACTIVE,
+            metadata: {
+              buttonId: message.buttonPressed,
+              buttonText: message.buttonText,
+            },
+          };
+          console.log('incomingMessageContent INTERACTIVE', JSON.stringify(incomingMessageContent));
           break;
 
         case WhatsAppMessageType.IMAGE: {
@@ -314,6 +325,96 @@ export class WhatsappApiService {
     } catch (error: any) {
       this.logger.error(`Error sending typing indicator: ${error.message}`, error.stack);
       return false;
+    }
+  }
+
+  /**
+   * Envía un mensaje interactivo con botones
+   * @param sendTo Número de teléfono del destinatario
+   * @param bodyText Texto principal del mensaje
+   * @param buttons Array de botones (máximo 3)
+   * @param headerText Texto del header (opcional)
+   * @param footerText Texto del footer (opcional)
+   * @returns ID del mensaje enviado
+   */
+  public async sendInteractiveButtonMessage(
+    sendTo: string,
+    bodyText: string,
+    buttons: Array<{ id: string; title: string }>,
+    headerText?: string,
+    footerText?: string,
+  ): Promise<string> {
+    if (!sendTo || !bodyText || !buttons || buttons.length === 0) {
+      throw new Error('El destinatario, texto del cuerpo y botones son requeridos');
+    }
+
+    if (buttons.length > 3) {
+      throw new Error('Máximo 3 botones permitidos');
+    }
+
+    // TEMPORAL: Usar número autorizado para testing
+    const testPhoneNumber = '541126336301'; // Cambia por tu número autorizado
+    const actualSendTo = testPhoneNumber;
+
+    const interactive: any = {
+      type: 'button',
+      body: {
+        text: bodyText,
+      },
+      action: {
+        buttons: buttons.map((button) => ({
+          type: 'reply',
+          reply: {
+            id: button.id,
+            title: button.title,
+          },
+        })),
+      },
+    };
+
+    if (headerText) {
+      interactive.header = {
+        type: 'text',
+        text: headerText,
+      };
+    }
+
+    if (footerText) {
+      interactive.footer = {
+        text: footerText,
+      };
+    }
+
+    const body = {
+      messaging_product: 'whatsapp',
+      recipient_type: 'individual',
+      to: actualSendTo,
+      type: 'interactive',
+      interactive,
+    };
+
+    this.logger.debug(`Enviando mensaje interactivo con botones a ${actualSendTo} (original: ${sendTo})`);
+
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post(`${this.baseEndpoint}/${this.phoneNumberId}/messages`, body, {
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        }),
+      );
+
+      const messageId = (response.data as any)?.messages?.[0]?.id;
+      this.logger.debug(`Mensaje interactivo enviado con ID: ${messageId}`);
+      return messageId;
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.error?.message || 'Error desconocido';
+      const errorDetails = error.response?.data?.error?.error_data?.details || 'Sin detalles';
+
+      this.logger.error(`Error enviando mensaje interactivo a ${actualSendTo}: ${errorMessage}`);
+
+      throw new Error(`Error enviando mensaje interactivo: ${errorMessage}. Detalles: ${errorDetails}`);
     }
   }
 }

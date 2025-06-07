@@ -1,5 +1,5 @@
 export class User {
-    telephone: string;
-    privatekey: string;
-    publickey: string;
-} 
+  telephone: string;
+  privatekey: string;
+  publickey: string;
+}

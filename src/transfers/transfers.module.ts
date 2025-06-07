@@ -4,9 +4,9 @@ import { TransfersController } from './transfers.controller';
 import { DatabaseModule } from '../database/database.module';
 
 @Module({
-    imports: [DatabaseModule],
-    controllers: [TransfersController],
-    providers: [TransfersService],
-    exports: [TransfersService],
+  imports: [DatabaseModule],
+  controllers: [TransfersController],
+  providers: [TransfersService],
+  exports: [TransfersService],
 })
-export class TransfersModule {} 
+export class TransfersModule {}

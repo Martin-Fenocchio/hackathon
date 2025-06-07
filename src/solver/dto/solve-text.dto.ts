@@ -1,3 +1,3 @@
 export class SolveTextDto {
-    text: string;
-} 
+  text: string;
+}

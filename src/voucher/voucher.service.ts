@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable } from '@nestjs/common';
-import { Transfer } from '../transfers/entities/transfer.entity';
 import * as puppeteer from 'puppeteer';
 import * as handlebars from 'handlebars';
 import { TemplateDelegate } from 'handlebars';
@@ -32,7 +31,11 @@ export class VoucherService {
     this.template = handlebars.compile(templateContent);
   }
 
-  async generateVoucherImage(transfer: Transfer): Promise<Buffer> {
+  async generateVoucherImage(transfer: {
+    amount: number;
+    transferid: string;
+    destination_publickey: string;
+  }): Promise<Buffer> {
     const browser = await puppeteer.launch({
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox'],

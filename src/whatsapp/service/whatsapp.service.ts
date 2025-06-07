@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
@@ -5,6 +6,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
+import * as fs from 'fs';
+import * as path from 'path';
 import { Injectable, HttpException, HttpStatus, Logger, Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SimpleIncomingMessageContent, SimpleIncomingMessagePayload } from '../../whatsapp/dto/whatsapp.message.dto';
@@ -17,6 +20,10 @@ import nutritionalAnalysisPrompt from '../../ai/utils/prompt/agent.prompt';
 import imageDescriptionPrompt from '../../ai/utils/prompt/imageDescription.prompt';
 import { ConversationMessage } from '../../ai/interfaces/completions';
 import { WhatsAppMessageType } from '../enum/message.types.enum';
+import { SolanaService } from 'src/solana/solana.service';
+import { OrchestratorService } from 'src/orchestrator/orchestrator.service';
+import { UsersService } from 'src/users/users.service';
+import { TransfersService } from 'src/transfers/transfers.service';
 
 @Injectable()
 export class WhatsAppService {
@@ -31,6 +38,10 @@ export class WhatsAppService {
     private readonly configService: ConfigService,
     private readonly whatsappApiService: WhatsappApiService,
     private readonly aiService: AiService,
+    private readonly solanaService: SolanaService,
+    private readonly orchestratorService: OrchestratorService,
+    private readonly usersService: UsersService,
+    private readonly transfersService: TransfersService,
   ) {
     this.verificationToken = 'hackathon';
     this.phoneNumberId = '720551657798613';
@@ -89,7 +100,11 @@ export class WhatsAppService {
 
       switch (incomingMessageContent.type) {
         case WhatsAppMessageType.TEXT:
-          await this.handleTextMessage(phoneNumber, incomingMessageContent.text || '');
+          await this.handleTextMessage(message);
+          break;
+
+        case WhatsAppMessageType.INTERACTIVE:
+          await this.handleButtonPress(message);
           break;
 
         case WhatsAppMessageType.IMAGE:
@@ -149,40 +164,209 @@ export class WhatsAppService {
     );
   }
 
-  private async handleTextMessage(phoneNumber: string, text: string) {
-    try {
-      this.logger.log(`Mensaje de texto recibido de ${phoneNumber}: ${text}`);
+  async handleTextMessage(message: SimpleIncomingMessagePayload) {
+    // Validaciones iniciales
+    if (!message.phoneNumber) {
+      this.logger.error('Número de teléfono no disponible');
+      return;
+    }
 
-      const history = this.getConversationHistory(phoneNumber);
+    // Resto del código existente para mensajes de texto
+    const text = message.text || '';
 
-      this.addToConversationHistory(phoneNumber, AIRole.USER, text);
+    // Detectar si es el primer mensaje (saludo)
+    const isFirstMessage =
+      text &&
+      (text.includes('hola') ||
+        text.includes('hello') ||
+        text.includes('hi') ||
+        text.includes('buenos') ||
+        text.includes('buenas'));
 
-      const response = await this.aiService.chat({
-        messages: [
-          {
-            role: AIRole.SYSTEM,
-            content: 'Responde hola',
-          },
-          ...history,
-          {
-            role: AIRole.USER,
-            content: text,
-          },
+    if (isFirstMessage) {
+      // Enviar mensaje con botones interactivos
+      await this.whatsappApiService.sendInteractiveButtonMessage(
+        message.phoneNumber,
+        '¡Hola! 👋 Bienvenido a tu asistente de criptomonedas. ¿Qué te gustaría hacer?',
+        [
+          { id: 'create_wallet', title: 'Crear Wallet' },
+          { id: 'import_wallet', title: 'Importar Wallet' },
         ],
-        model: OpenAIModel.GPT4O_MINI,
-        maxTokens: 800,
+        '🚀 Tu Asistente Crypto',
+        'Selecciona una opción para continuar',
+      );
+
+      // Guardar en historial
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      this.conversationCache.set(message.phoneNumber, [
+        {
+          role: AIRole.USER,
+          content: message.text || text,
+        },
+        {
+          role: AIRole.ASSISTANT,
+          content: 'Mensaje de bienvenida con botones enviado',
+        },
+      ]);
+
+      return;
+    }
+
+    try {
+      this.logger.log(`Mensaje de texto recibido de ${message.phoneNumber}: ${text}`);
+
+      // const history = this.getConversationHistory(message.phoneNumber);
+
+      // const response = await this.aiService.chat({
+      //   messages: history,
+      //   model: OpenAIModel.GPT4O_MINI,
+      //   maxTokens: 800,
+      // });
+
+      // this.addToConversationHistory(message.phoneNumber, AIRole.ASSISTANT, response);
+
+      // await this.whatsappApiService.sendTextMessage(message.phoneNumber, response);
+      console.log('orchestrateTransferText', message.phoneNumber, text);
+      const result = await this.orchestratorService.orchestrateTransferText({
+        text,
+        userTelephone: message.phoneNumber,
       });
 
-      this.addToConversationHistory(phoneNumber, AIRole.ASSISTANT, response);
+      console.log(result, 'result');
 
-      await this.whatsappApiService.sendTextMessage(phoneNumber, response);
+      await this.whatsappApiService.sendInteractiveButtonMessage(
+        message.phoneNumber,
+        `¿Quieres confirmar la transferencia de ${result.amount} pesos a ${result.recipient.value}?`,
+        [
+          { id: 'no', title: 'No' },
+          { id: 'si', title: 'Si' },
+        ],
+      );
     } catch (error) {
       this.logger.error('Error procesando mensaje de texto:', error);
       await this.whatsappApiService.sendTextMessage(
-        phoneNumber,
+        message.phoneNumber,
         'Lo siento, hubo un error procesando tu mensaje. Por favor intenta de nuevo.',
       );
     }
+  }
+
+  async handleButtonPress(message: SimpleIncomingMessagePayload) {
+    const buttonId = message.buttonPressed;
+    const buttonText = message.buttonText;
+    const phoneNumber = message.phoneNumber;
+
+    // Validaciones
+    if (!phoneNumber) {
+      this.logger.error('Número de teléfono no disponible en mensaje interactivo');
+      return;
+    }
+
+    if (!buttonId) {
+      this.logger.error('ID de botón no disponible');
+      return;
+    }
+
+    console.log(`Botón presionado: ${buttonId} - ${buttonText || 'Sin título'}`);
+
+    switch (buttonId) {
+      case 'create_wallet': {
+        const wallet = await this.solanaService.createWallet();
+
+        const user = await this.usersService.create(phoneNumber, wallet.secretKey, wallet.publicKey);
+
+        await this.whatsappApiService.sendTextMessage(
+          phoneNumber,
+          `¡Perfecto! 🎉 Hemos creado tu wallet.\n\n` +
+            `🌎 Llave pública: ${wallet.publicKey}\n` +
+            `🔒 Llave privada: ${wallet.secretKey}\n\n` +
+            `¿Queres enviar pesos a un amigo? 💸`,
+        );
+
+        this.addToConversationHistory(
+          phoneNumber,
+          AIRole.ASSISTANT,
+          `¡Perfecto! 🎉 Hemos creado tu wallet.\n\n` +
+            `🌎 Llave pública: ${wallet.publicKey}\n` +
+            `🔒 Llave privada: ${wallet.secretKey}\n\n` +
+            `¿Queres enviar pesos a un amigo? 💸`,
+        );
+
+        break;
+      }
+
+      case 'import_wallet': {
+        await this.whatsappApiService.sendTextMessage(
+          phoneNumber,
+          '💼 Para importar tu wallet necesito:\n\n' +
+            '🔑 Tu clave privada (seed phrase)\n\n' +
+            'Por favor, envía tu clave privada de forma segura.',
+        );
+
+        this.addToConversationHistory(
+          phoneNumber,
+          AIRole.ASSISTANT,
+          '💼 Para importar tu wallet necesito:\n\n' +
+            '🔑 Tu clave privada (seed phrase)\n\n' +
+            'Por favor, envía tu clave privada de forma segura.',
+        );
+
+        break;
+      }
+
+      case 'si': {
+        const result = await this.orchestratorService.orchestrateConfirmTransfer({ telephone: phoneNumber });
+
+        // Crear archivo temporal del voucher
+        const tempDir = path.join(process.cwd(), 'temp');
+
+        // Crear directorio temporal si no existe
+        if (!fs.existsSync(tempDir)) {
+          fs.mkdirSync(tempDir, { recursive: true });
+        }
+
+        const tempFilePath = path.join(tempDir, `voucher_${Date.now()}.png`);
+
+        // Escribir buffer a archivo temporal
+        fs.writeFileSync(tempFilePath, result.voucherImage);
+
+        try {
+          // Subir la imagen y obtener mediaId
+          const mediaId = await this.whatsappApiService.uploadMedia(tempFilePath);
+
+          // Enviar imagen del comprobante
+          await this.whatsappApiService.sendMediaMessage(phoneNumber, mediaId, 'image', 'Comprobante de transferencia');
+
+          // Limpiar archivo temporal
+          fs.unlinkSync(tempFilePath);
+        } catch (error) {
+          // Limpiar archivo temporal en caso de error
+          if (fs.existsSync(tempFilePath)) {
+            fs.unlinkSync(tempFilePath);
+          }
+          throw error;
+        }
+
+        break;
+      }
+
+      default:
+        await this.whatsappApiService.sendTextMessage(
+          phoneNumber,
+          'Opción no reconocida. Por favor, usa los botones disponibles.',
+        );
+    }
+
+    // Actualizar historial de conversación
+    const currentHistory = this.conversationCache.get(phoneNumber) || [];
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    currentHistory.push({
+      role: AIRole.USER,
+      content: `Botón presionado: ${buttonText || buttonId}`,
+    });
+    this.conversationCache.set(phoneNumber, currentHistory);
   }
 
   async sendTextMessage(phoneNumber: string, text: string): Promise<void> {
@@ -217,6 +401,8 @@ export class WhatsAppService {
       } else if (messageContent.type === WhatsAppMessageType.AUDIO) {
         responseText = await this.processAudioWithAI(messageContent, phoneNumber);
       }
+
+      console.log(responseText, 'responseText');
 
       await this.whatsappApiService.sendTextMessage(phoneNumber, responseText, message);
 
@@ -308,13 +494,15 @@ export class WhatsAppService {
         mimetype: messageContent.media.mimetype || 'audio/ogg',
       });
 
+      console.log(transcription, 'transcription');
+
       const history = this.getConversationHistory(phoneNumber);
 
       const response = await this.aiService.chat({
         messages: [
           {
             role: AIRole.SYSTEM,
-            content: nutritionalAnalysisPrompt,
+            content: 'Responde en español',
           },
           ...history,
           {
@@ -327,7 +515,7 @@ export class WhatsAppService {
         maxTokens: 1200,
       });
 
-      return response.responseText;
+      return response;
     } catch (error) {
       this.logger.error('Error processing audio with AI:', error);
       return '🎵 He recibido tu audio, pero no pude transcribirlo en este momento. Por favor intenta más tarde.';

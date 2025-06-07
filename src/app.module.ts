@@ -10,6 +10,7 @@ import { HttpModule } from '@nestjs/axios';
 import { ConfigModule } from '@nestjs/config';
 import { OrchestratorModule } from './orchestrator/orchestrator.module';
 import { TransfersModule } from './transfers/transfers.module';
+import { PolygonModule } from './polygon/polygon.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { TransfersModule } from './transfers/transfers.module';
     HttpModule,
     OrchestratorModule,
     TransfersModule,
+    PolygonModule,
   ],
   controllers: [AppController],
   providers: [AppService],

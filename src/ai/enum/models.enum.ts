@@ -12,9 +12,9 @@ export enum OpenAIModel {
   GPT4_32K_0314 = 'gpt-4-32k-0314',
   GPT4_32K_0613 = 'gpt-4-32k-0613',
   GPT3_5_TURBO = 'gpt-3.5-turbo',
-  GPT4_1 = 'gpt-4.1-2025-04-14',
   WHISPER_1 = 'whisper-1',
   WHISPER_2 = 'whisper-2',
+  GPT4_1 = 'gpt-4.1-2025-04-14',
 }
 
 export enum AnthropicModel {

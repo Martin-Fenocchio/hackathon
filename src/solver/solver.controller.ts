@@ -5,10 +5,10 @@ import { TextSolverResult } from './interfaces/solver-result.interface';
 
 @Controller('solver')
 export class SolverController {
-    constructor(private readonly solverService: SolverService) {}
+  constructor(private readonly solverService: SolverService) {}
 
-    @Post('solve')
-    async solveText(@Body() solveTextDto: SolveTextDto): Promise<TextSolverResult> {
-        return this.solverService.solveText(solveTextDto);
-    }
-} 
+  @Post('solve')
+  async solveText(@Body() solveTextDto: SolveTextDto): Promise<TextSolverResult> {
+    return this.solverService.solveText(solveTextDto);
+  }
+}
