@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
@@ -9,8 +10,8 @@ import { OrchestrateTransferTextDto } from './dto/orchestrate-text.dto';
 import { OrchestratorResult } from './interfaces/orchestrator-result.interface';
 import { TransfersService } from 'src/transfers/transfers.service';
 import { RecipientSolverResult } from 'src/solver/interfaces/solver-result.interface';
-import { Transfer } from 'src/transfers/entities/transfer.entity';
 import { VoucherService } from '../voucher/voucher.service';
+import { SolanaService } from 'src/solana/solana.service';
 
 @Injectable()
 export class OrchestratorService {
@@ -19,6 +20,7 @@ export class OrchestratorService {
     private readonly contactsService: ContactsService,
     private readonly transfersService: TransfersService,
     private readonly voucherService: VoucherService,
+    private readonly solanaService: SolanaService,
   ) {}
 
   async orchestrateTransferText(orchestrateTransferTextDto: OrchestrateTransferTextDto): Promise<OrchestratorResult> {
@@ -54,12 +56,23 @@ export class OrchestratorService {
     };
   }
 
-  async orchestrateConfirmTransfer(telephone: string): Promise<{ transfer: Transfer; voucherImage: Buffer }> {
-    const transfer = await this.transfersService.confirmLastPendingTransfer(telephone);
-    const voucherImage = await this.voucherService.generateVoucherImage(transfer);
+  async orchestrateConfirmTransfer(payload: {
+    fromSecretKey: string;
+    toPublicKey: string;
+    amountSol: number;
+    telephone: string;
+  }): Promise<{ voucherImage: Buffer }> {
+    this.transfersService.confirmLastPendingTransfer(payload.telephone);
+
+    const { transferenceID } = await this.solanaService.transferSol(payload);
+
+    const voucherImage = await this.voucherService.generateVoucherImage({
+      transferid: transferenceID,
+      amount: payload.amountSol,
+      destination_publickey: payload.toPublicKey,
+    });
 
     return {
-      transfer,
       voucherImage,
     };
   }
