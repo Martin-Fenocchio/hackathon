@@ -20,8 +20,6 @@ export class AiService {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
   ) {
-    console.log('t', this.configService.get<string>('OPENAI_API_KEY'));
-
     this.openai = new OpenAI({
       apiKey: this.configService.get<string>('OPENAI_API_KEY'),
     });
